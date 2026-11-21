@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: price-pulse-v3
+  datasource:
+    url: jdbc:mysql://127.0.0.1:23306/price_pulse?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&rewriteBatchedStatements=true
+    username: pricepulse
+    password: ${DB_PASSWORD:pricepulse_local}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 5000
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 26379
+      timeout: 500ms
+      connect-timeout: 500ms
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+rocketmq:
+  name-server: 127.0.0.1:29876
+  producer:
+    group: pricepulse-v3-producer
+
+server:
+  port: 8080
+  error:
+    include-message: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+pricepulse:
+  lanes: 16
+  lane-queue-capacity: 1024
+  backpressure-blocking: true
+  simulator:
+    enabled: false
+    interval-ms: 200
+  read-cache:
+    enabled: true
+    base-ttl-seconds: 300
+    null-ttl-seconds: 30
+    jitter-max-seconds: 60
+  matching:
+    force-db-fallback: false
+    reconcile-interval-ms: 30000
+    recovery-probe-interval-ms: 2000
