@@ -1,5 +1,9 @@
 package com.pricepulse.market.controller;
 
+import com.pricepulse.alert.service.AlertNotificationConsumer;
+import com.pricepulse.alert.service.AlertTriggerService;
+import com.pricepulse.alert.service.OutboxPublisher;
+import com.pricepulse.alert.ws.NotificationWebSocketHandler;
 import com.pricepulse.market.feed.MarketSimulatorRunner;
 import com.pricepulse.market.model.KlineBar;
 import com.pricepulse.market.model.QuoteSnapshot;
@@ -30,19 +34,31 @@ public class MarketController {
     private final RuleMatchEngine ruleMatchEngine;
     private final RuleIndexMaintainer ruleIndexMaintainer;
     private final MarketSimulatorRunner marketSimulatorRunner;
+    private final AlertTriggerService alertTriggerService;
+    private final OutboxPublisher outboxPublisher;
+    private final AlertNotificationConsumer alertNotificationConsumer;
+    private final NotificationWebSocketHandler notificationWebSocketHandler;
 
     public MarketController(MarketQueryService marketQueryService,
                             QuoteLaneDispatcher quoteLaneDispatcher,
                             KlineAggregator klineAggregator,
                             RuleMatchEngine ruleMatchEngine,
                             RuleIndexMaintainer ruleIndexMaintainer,
-                            MarketSimulatorRunner marketSimulatorRunner) {
+                            MarketSimulatorRunner marketSimulatorRunner,
+                            AlertTriggerService alertTriggerService,
+                            OutboxPublisher outboxPublisher,
+                            AlertNotificationConsumer alertNotificationConsumer,
+                            NotificationWebSocketHandler notificationWebSocketHandler) {
         this.marketQueryService = marketQueryService;
         this.quoteLaneDispatcher = quoteLaneDispatcher;
         this.klineAggregator = klineAggregator;
         this.ruleMatchEngine = ruleMatchEngine;
         this.ruleIndexMaintainer = ruleIndexMaintainer;
         this.marketSimulatorRunner = marketSimulatorRunner;
+        this.alertTriggerService = alertTriggerService;
+        this.outboxPublisher = outboxPublisher;
+        this.alertNotificationConsumer = alertNotificationConsumer;
+        this.notificationWebSocketHandler = notificationWebSocketHandler;
     }
 
     @GetMapping("/stocks")
@@ -78,6 +94,15 @@ public class MarketController {
         status.put("flushedKlineBars", klineAggregator.getFlushedBarCount());
         status.put("dbQueryCount", marketQueryService.getDbQueryCount());
         status.put("maintainerQueueSize", ruleIndexMaintainer.getQueueSize());
+        status.put("outboxPendingCount", outboxPublisher.getPendingCount());
+        status.put("outboxPublishedCount", outboxPublisher.getPublishedCount());
+        status.put("outboxRetryCount", outboxPublisher.getRetryScheduledCount());
+        status.put("outboxStaleLeaseCount", outboxPublisher.getStaleLeaseIgnoredCount());
+        status.put("triggeredRuleCount", alertTriggerService.getTriggeredCount());
+        status.put("optimisticConflictCount", alertTriggerService.getOptimisticConflictCount());
+        status.put("consumedNotificationCount", alertNotificationConsumer.getConsumedCount());
+        status.put("duplicateNotificationCount", alertNotificationConsumer.getDuplicateCount());
+        status.put("wsActiveSessions", notificationWebSocketHandler.getActiveSessionCount());
         return status;
     }
 

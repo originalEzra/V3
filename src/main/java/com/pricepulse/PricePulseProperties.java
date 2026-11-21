@@ -11,6 +11,8 @@ public class PricePulseProperties {
     private Simulator simulator = new Simulator();
     private ReadCache readCache = new ReadCache();
     private Matching matching = new Matching();
+    private Outbox outbox = new Outbox();
+    private Mq mq = new Mq();
 
     public int getLanes() {
         return lanes;
@@ -58,6 +60,22 @@ public class PricePulseProperties {
 
     public void setMatching(Matching matching) {
         this.matching = matching;
+    }
+
+    public Outbox getOutbox() {
+        return outbox;
+    }
+
+    public void setOutbox(Outbox outbox) {
+        this.outbox = outbox;
+    }
+
+    public Mq getMq() {
+        return mq;
+    }
+
+    public void setMq(Mq mq) {
+        this.mq = mq;
     }
 
     public static class Simulator {
@@ -147,6 +165,138 @@ public class PricePulseProperties {
 
         public void setRecoveryProbeIntervalMs(long recoveryProbeIntervalMs) {
             this.recoveryProbeIntervalMs = recoveryProbeIntervalMs;
+        }
+    }
+
+    public static class Outbox {
+        private boolean enabled = true;
+        private long pollIntervalMs = 200;
+        private int batchSize = 50;
+        private int leaseSeconds = 30;
+        private long initialBackoffSeconds = 1;
+        private long maxBackoffSeconds = 30;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public long getPollIntervalMs() {
+            return pollIntervalMs;
+        }
+
+        public void setPollIntervalMs(long pollIntervalMs) {
+            this.pollIntervalMs = pollIntervalMs;
+        }
+
+        public int getBatchSize() {
+            return batchSize;
+        }
+
+        public void setBatchSize(int batchSize) {
+            this.batchSize = batchSize;
+        }
+
+        public int getLeaseSeconds() {
+            return leaseSeconds;
+        }
+
+        public void setLeaseSeconds(int leaseSeconds) {
+            this.leaseSeconds = leaseSeconds;
+        }
+
+        public long getInitialBackoffSeconds() {
+            return initialBackoffSeconds;
+        }
+
+        public void setInitialBackoffSeconds(long initialBackoffSeconds) {
+            this.initialBackoffSeconds = initialBackoffSeconds;
+        }
+
+        public long getMaxBackoffSeconds() {
+            return maxBackoffSeconds;
+        }
+
+        public void setMaxBackoffSeconds(long maxBackoffSeconds) {
+            this.maxBackoffSeconds = maxBackoffSeconds;
+        }
+    }
+
+    public static class Mq {
+        private boolean consumerEnabled = true;
+        private String topic = "pricepulse-alert-triggered";
+        private String consumerGroup = "pricepulse-v3-alert-consumer";
+        private int consumeThreadMin = 4;
+        private int consumeThreadMax = 8;
+        private int maxReconsumeTimes = 3;
+        private int reconsumeDelayLevel = 0;
+        private long sendTimeoutMs = 3000;
+
+        public boolean isConsumerEnabled() {
+            return consumerEnabled;
+        }
+
+        public void setConsumerEnabled(boolean consumerEnabled) {
+            this.consumerEnabled = consumerEnabled;
+        }
+
+        public String getTopic() {
+            return topic;
+        }
+
+        public void setTopic(String topic) {
+            this.topic = topic;
+        }
+
+        public String getConsumerGroup() {
+            return consumerGroup;
+        }
+
+        public void setConsumerGroup(String consumerGroup) {
+            this.consumerGroup = consumerGroup;
+        }
+
+        public int getConsumeThreadMin() {
+            return consumeThreadMin;
+        }
+
+        public void setConsumeThreadMin(int consumeThreadMin) {
+            this.consumeThreadMin = consumeThreadMin;
+        }
+
+        public int getConsumeThreadMax() {
+            return consumeThreadMax;
+        }
+
+        public void setConsumeThreadMax(int consumeThreadMax) {
+            this.consumeThreadMax = consumeThreadMax;
+        }
+
+        public int getMaxReconsumeTimes() {
+            return maxReconsumeTimes;
+        }
+
+        public void setMaxReconsumeTimes(int maxReconsumeTimes) {
+            this.maxReconsumeTimes = maxReconsumeTimes;
+        }
+
+        public int getReconsumeDelayLevel() {
+            return reconsumeDelayLevel;
+        }
+
+        public void setReconsumeDelayLevel(int reconsumeDelayLevel) {
+            this.reconsumeDelayLevel = reconsumeDelayLevel;
+        }
+
+        public long getSendTimeoutMs() {
+            return sendTimeoutMs;
+        }
+
+        public void setSendTimeoutMs(long sendTimeoutMs) {
+            this.sendTimeoutMs = sendTimeoutMs;
         }
     }
 }

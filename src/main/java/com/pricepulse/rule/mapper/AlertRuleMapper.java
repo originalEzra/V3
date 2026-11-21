@@ -68,6 +68,35 @@ public interface AlertRuleMapper {
     int softDeleteOptimistic(@Param("id") Long id, @Param("version") Long version);
 
     @Select("""
+            <script>
+            SELECT id, user_id, stock_id, direction, threshold_price, status, version, created_at, updated_at
+            FROM alert_rules
+            WHERE id IN
+            <foreach collection="ids" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            </script>
+            """)
+    List<AlertRule> findByIds(@Param("ids") List<Long> ids);
+
+    @Update("""
+            UPDATE alert_rules
+            SET status = 'COMPLETED',
+                version = version + 1,
+                updated_at = NOW()
+            WHERE id = #{id}
+              AND stock_id = #{stockId}
+              AND status = 'ACTIVE'
+              AND version = #{version}
+              AND ((direction = 'ABOVE' AND threshold_price <= #{price})
+                   OR (direction = 'BELOW' AND threshold_price >= #{price}))
+            """)
+    int completeRuleOptimistic(@Param("id") Long id,
+                               @Param("stockId") Long stockId,
+                               @Param("version") Long version,
+                               @Param("price") BigDecimal price);
+
+    @Select("""
             SELECT id FROM alert_rules
             WHERE stock_id = #{stockId} AND status = 'ACTIVE' AND direction = 'ABOVE' AND threshold_price <= #{price}
             UNION ALL

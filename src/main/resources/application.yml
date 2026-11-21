@@ -28,6 +28,8 @@ rocketmq:
   name-server: 127.0.0.1:29876
   producer:
     group: pricepulse-v3-producer
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 0
 
 server:
   port: 8080
@@ -56,3 +58,19 @@ pricepulse:
     force-db-fallback: false
     reconcile-interval-ms: 30000
     recovery-probe-interval-ms: 2000
+  outbox:
+    enabled: true
+    poll-interval-ms: 200
+    batch-size: 50
+    lease-seconds: 30
+    initial-backoff-seconds: 1
+    max-backoff-seconds: 30
+  mq:
+    consumer-enabled: true
+    topic: pricepulse-alert-triggered
+    consumer-group: pricepulse-v3-alert-consumer
+    consume-thread-min: 4
+    consume-thread-max: 8
+    max-reconsume-times: 3
+    reconsume-delay-level: 0
+    send-timeout-ms: 3000
